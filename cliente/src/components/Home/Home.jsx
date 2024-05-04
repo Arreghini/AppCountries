@@ -3,42 +3,40 @@ import { useDispatch, useSelector } from 'react-redux';
 import { placeCountries, filterCountries, orderCountries } from "../../redux/actions.js";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import CardsCountries from "../cardsCountries/CardsCountries";
+import CardsCountries from "../cardsCountries/CardsCountries.jsx";
 
 function Home() {
   const dispatch = useDispatch();
   const allCountries = useSelector(state => state.allCountries);
   const filteredCountries = useSelector(state => state.filteredCountries);
-  const PageSize = 9;
-  const [currentPage, setCurrentPage] = useState(1);
-  const [searchCountry, setSearchCountry] = useState("");
-  const [activities, setActivities] = useState([]);
+  const PageSize = 9; // acá definimos el tamaño de cuantas cards queremos visualizar en cada página
+  const [currentPage, setCurrentPage] = useState(1); // página actual
+  const [searchCountry, setSearchCountry] = useState(""); // Agregamos el estado para la barra de búsqueda
+  const [activities, setActivities] = useState([]); // Estado para almacenar las actividades
   const navigate = useNavigate();
 
-  // Cargar todos los países y actividades al montar el componente
-  useEffect(() => {
-    dispatch(placeCountries());
-    loadAllActivities();
-  }, [dispatch]);
+   console.log('muestro filteredCountries',filteredCountries)
+   useEffect(() => {
+ //   console.log(filteredCountries)
+     dispatch(placeCountries()); // Carga todos los países cuando el componente se monta
+     allActivities();
+   }, [dispatch]); 
 
-  // Cargar actividades desde el servidor
-  const loadAllActivities = async () => {
+  const allActivities = async () => {
     try {
       const response = await axios.get('http://localhost:3001/activities');
-      setActivities(response.data);
+      setActivities(response.data); // Actualiza el estado con los datos de las actividades
     } catch (error) {
-      console.error("Error loading activities:", error);
+      throw error;
     }
   };
 
-  // Manejar cambios en el filtro de continente o actividad
   const handleFilterChange = (event) => {
     const { name, value } = event.target;
     dispatch(filterCountries({ [name]: value }));
-    setCurrentPage(1); // Restablecer a la primera página cuando se aplica un nuevo filtro
+    setCurrentPage(1);
   };
 
-  // Manejar cambios en el orden de la lista
   const handleOrderChange = (event) => {
     const { name, value } = event.target;
     let type, order;
@@ -52,35 +50,99 @@ function Home() {
     } else if (value === "D") {
       order = 'D';
     }
+    // Envio tipo y orden al action creator
     dispatch(orderCountries({ type, order }));
   };
 
-  // Manejar cambio de página
+  //esto define el manejo de cambio de página
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
+  const totalPages = Math.ceil(filteredCountries.length / PageSize);
 
-  // Calcular índices de inicio y fin para la paginación
+  // Calcular el índice inicial y final para la paginación
   const startIndex = (currentPage - 1) * PageSize;
   const endIndex = Math.min(startIndex + PageSize, filteredCountries.length);
 
-  // Obtener los países para la página actual
+  // Filtrar y ordenar los países para la página actual
   const countriesForPage = filteredCountries.slice(startIndex, endIndex);
-  
-  // Manejar envío del formulario de búsqueda
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    // Tu lógica de búsqueda aquí...
+  const getCurrentPageNumber = () => {
+    return currentPage;
   };
-
-  // Manejar cambios en el campo de búsqueda
+//console.log(countriesForPage)
+const handleSubmit = (event) => {
+  event.preventDefault();
+  if (allCountries) {
+    const countryExists = allCountries.find(country => country.name.toLowerCase() === searchCountry.toLowerCase());
+    if (countryExists) {
+      navigate(`/detail/${countryExists.id}`);
+    } else {
+      alert('El país ingresado no existe en la base de datos.');
+    }
+  } else {
+    alert('Aún se están cargando los datos de los países. Por favor, inténtalo de nuevo más tarde.');
+  }
+};
   const handleChange = (event) => {
     setSearchCountry(event.target.value);
   };
 
   return (
     <>
-      {/* Tu JSX de la interfaz de usuario aquí... */}
+      <div className="bg-green-100 py-2">
+        <form onSubmit={handleSubmit} className="flex justify-center">
+          <input type="text" className="border-2 border-black rounded-md px-2 py-1 mr-2 bg-yellow-50" value={searchCountry} onChange={handleChange} />
+          <button type="submit" className="bg-green-600 hover:bg-green-700 text-white font-bold px-4  py-2 rounded-md">
+            <span>Search:</span><br />
+            <span>Nombre del país</span>
+          </button>
+        </form>
+      </div>
+      <div className="flex bg-green-100 justify-center">
+        <div className="my-4 mx-2">
+          <select name="continent" className="border-2 border-black rounded-md px-2 py-1 bg-yellow-50" onChange={handleFilterChange}>
+            <option value="">Todos los continentes</option>
+            <option value="South America">South America</option>
+            <option value="North America">North America</option>
+            <option value="Europe">Europe</option>
+            <option value="Asia">Asia</option>
+            <option value="Oceania">Oceania</option>
+            <option value="Africa">Africa</option>
+          </select>
+        </div>
+        <div className="my-4 mx-2">
+          <select name="activity" className="border-2 border-black rounded-md px-2 py-1 bg-yellow-50" onChange={handleFilterChange}>
+            <option value="">Todas las actividades</option>
+            {Array.from(new Set(activities.map(activity => activity.name))).map((activityName, index) => (
+              <option key={index} value={activityName}>{activityName}</option>
+            ))}
+          </select>
+        </div>
+        <div className="my-4 mx-2">
+          <select name="alphabetically" className="border-2 border-black rounded-md px-2 py-1 bg-yellow-50" onChange={handleOrderChange}>
+            <option value="">Nombre</option>
+            <option value="A">Ascendente</option>
+            <option value="D">Descendente</option>
+          </select>
+        </div>
+        <div className="my-4 mx-2">
+          <select name="byPopulation" className="border-2 border-black rounded-md px-2 py-1 bg-yellow-50" onChange={handleOrderChange}>
+            <option value="">Población</option>
+            <option value="A">Ascendente</option>
+            <option value="D">Descendente</option>
+          </select>
+        </div>
+      </div>
+      <div className="pagination-container flex justify-center bg-green-100 mt-1 mb-1">
+        <div className="pagination-buttons">
+          <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} className="bg-yellow-300 hover:bg-yellow-400 text-black px-4 py-1 rounded-md">{'<<'}</button>
+          <button className="bg-yellow-300 text-black px-4 py-1 rounded-md">{getCurrentPageNumber()}</button>
+          <button onClick={() => handlePageChange(currentPage + 1)} disabled={endIndex >= filteredCountries.length} className="bg-yellow-300 hover:bg-yellow-400 text-black px-4 py-1 rounded-md">{'>>'}</button>
+        </div>
+      </div>
+      <div className="countries-column">
+        <CardsCountries countriesForPage={countriesForPage} />
+      </div>
     </>
   );
 }

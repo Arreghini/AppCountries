@@ -1,5 +1,5 @@
 import React from 'react'
-import Detail from '../../components/detail/Detail'
+import Detail from '../../src/components/detail/Detail'
 
 const DetailView = () => {
   return (

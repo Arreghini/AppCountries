@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from 'react-redux';
-import '../Form/Form.css';
-import { Link } from 'react-router-dom'
 import axios from "axios";
-import validate from '../Utils/validate.js'
+import validate from '../Utils/validate.js';
 import { placeCountries } from '../../redux/actions.js';
-import Navbar from "../Navbar/Navbar.jsx";
+import actividadPaises from '../../assets/actividadesPaises.jpg';
 
 const Form = () => {
   
   const allCountries = useSelector(state => state.allCountries);
   const [selectedCountries, setSelectedCountries] = useState([]); // Estado para almacenar los países seleccionados
+  const [searchText, setSearchText] = useState(""); // Estado para almacenar el valor de búsqueda
 
   const [activity, setActivity] = useState({
     name: "",
@@ -83,52 +82,60 @@ const Form = () => {
 
   return (
     <>
-      <Navbar /> 
-      <form onSubmit={handleSubmit}>
-        <label>
-          <span>Países:</span>
-          <select name="country" onChange={handleChange} value="">
-            <option value="" disabled>Selecciona un país</option>
-            {allCountries.map(country => (
-              <option key={country.id} value={country.id}>{country.name}</option>
-            ))}
-          </select>
-        </label>
-        <div>
-          {selectedCountries.map(countryId => (
-            <span key={countryId} className="selected-country">
-              {allCountries.find(country => country.id === countryId)?.name}
-              <button type="button" onClick={() => handleRemoveCountry(countryId)}>X</button>
-            </span> 
-          ))}
-
+      <div className="bg-cover bg-center bg-no-repeat h-screen flex items-center justify-center" style={{ backgroundImage: `url(${actividadPaises})`, backgroundAttachment: 'fixed' }}>
+        <div className="bg-green-200 p-8 rounded-lg w-96 min-h-60 overflow-y-auto" style={{ position: 'relative', minHeight: '60vh' }}>
+          <h1 className="text-3xl font-bold mb-8">Crear actividad</h1>
+          <form onSubmit={handleSubmit}>
+            <div className="search-container bg-green-100 mb-4">
+              {/* Usar el estado searchText para mostrar el valor de búsqueda */}
+              <input type="text" className="search-pais bg-green-100" placeholder="Buscar país" value={searchText} onChange={(e) => setSearchText(e.target.value)} />
+              <select name="country" onChange={handleChange} value="">
+                <option value="" disabled>Selecciona un país</option>
+                {/* Filtrar la lista de países según el valor de searchText */}
+                {allCountries
+                  .filter(country => country.name.toLowerCase().includes(searchText.toLowerCase()))
+                  .map(country => (
+                    <option key={country.id} value={country.id}>{country.name}</option>
+                  ))
+                }
+              </select>
+            </div>
+            <div>
+              {selectedCountries.map(countryId => (
+                <span key={countryId} className="selected-country">
+                  {allCountries.find(country => country.id === countryId)?.name}
+                  <button type="button" onClick={() => handleRemoveCountry(countryId)}>X</button>
+                </span> 
+              ))}
+            </div>
+            <label>
+              <span>Nombre:</span>
+              <input type='text' name='name' value={activity.name} onChange={handleChange} className="bg-green-100 mb-4" />
+            </label>
+            {(errors && errors.name && errors.name !== '') ? <p>{errors.name}</p> : null}
+          
+            <label>
+              <span>Dificultad:</span>
+              <input name='difficulty' value={activity.difficulty} onChange={handleChange} className="bg-green-100 mb-4" />
+            </label>
+            {(errors && errors.difficulty && errors.difficulty !== '') ? (<p>{errors.difficulty}</p>) : null}
+          
+            <label>
+              <span>Duración:</span>
+              <input type='text' name='duration' value={activity.duration} onChange={handleChange} className="bg-green-100 mb-4" />
+            </label>
+            {(errors && errors.duration && errors.duration !== '') ? <p>{errors.duration}</p> : null}
+          
+            <label>
+              <span>Temporada:</span>
+              <input type='text' name='season' value={activity.season} onChange={handleChange} className="bg-green-100 mb-4" />
+            </label>
+            {(errors && errors.season && errors.season !== '') ? <p>{errors.season}</p> : null}
+          
+            <button type='submit' disabled={hasErrors(errors)} className="bg-green-500 text-white px-4 py-2 font-bold rounded hover:bg-green-600">Crear actividad</button>
+          </form>
         </div>
-        <label>
-          <span>Nombre:</span>
-          <input type='text' name='name' value={activity.name} onChange={handleChange} />
-        </label>
-        {(errors && errors.name && errors.name !== '') ? <p>{errors.name}</p> : null}
-     
-        <label>
-          <span>Dificultad:</span>
-          <input name='difficulty' value={activity.difficulty} onChange={handleChange} />
-        </label>
-        {(errors && errors.difficulty && errors.difficulty !== '') ? (<p>{errors.difficulty}</p>) : null}
-     
-        <label>
-          <span>Duración:</span>
-          <input type='text' name='duration' value={activity.duration} onChange={handleChange} />
-        </label>
-        {(errors && errors.duration && errors.duration !== '') ? <p>{errors.duration}</p> : null}
-     
-        <label>
-          <span>Temporada:</span>
-          <input type='text' name='season' value={activity.season} onChange={handleChange} />
-        </label>
-        {(errors && errors.season && errors.season !== '') ? <p>{errors.season}</p> : null}
-     
-        <button type='submit' disabled={hasErrors(errors)}>Crear actividad</button>
-      </form>
+      </div>
     </>
   );
 };
