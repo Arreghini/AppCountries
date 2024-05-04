@@ -7,13 +7,13 @@ const Landing = ({ onSearch }) => {
     <div className="relative h-screen" style={{ backgroundImage: `url(${FondoLanding})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
       <div className="absolute top-0 left-0 w-full h-full bg-black opacity-50 flex flex-col justify-center items-center text-center">
         <h1 className="text-white text-4xl font-bold mb-4">¡Bienvenido a nuestra página!</h1>
-        <div className="text-white text-lg mb-8 w-3/4 mx-auto mb-10">
-          <div className="text-justify">
-            <p>Aquí podrás encontrar información sobre cada país de la Tierra.</p>
-            <p>Podrás conocer sus características generales, su bandera entre otras.</p>
-            <p>También podrás encontrar qué actividades turísticas y deportivas podrás realizar en cada uno de ellos.</p>
-            <p>Así podrás conocer más sobre cada país y planificar un viaje en busca de aventuras.</p>
-          </div>
+        <div className="text-white text-lg mb-8 mx-4 max-w-[30rem]">
+          <p className="text-justify">
+          Explora la diversidad de cada país del mundo. Descubre sus características distintivas, 
+          incluyendo detalles como su bandera, capital, población y mucho más. Investiga sobre las emocionantes 
+          actividades turísticas y deportivas disponibles en cada destino y agrégalas. ¡Prepárate para ampliar tus horizontes 
+          y planificar una emocionante aventura en cada rincón del mundo!"
+          </p>
         </div>
         <div className="mt-4">
           <Link to='/home'>
